@@ -1,75 +1,151 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using UnityEngine;
 
 public class GameManegerScript : MonoBehaviour
 {
-    private void PrintArray()
-    {
-        string debugtext = "";
-        for (int i = 0; i < map.Length; i++)
-        {
-            debugtext += map[i].ToString() + ",";
-        }
-        Debug.Log(debugtext);
-    }
+    //追加
+    public GameObject playerPrefab;
+    
+    //宣言の例
+    int[,] map;
 
-    int GetPlayerIndex()
+    GameObject[,] field;//ゲーム管理用の配列
+
+
+    //private void PrintArray()
+    //{
+    //    string debugtext = "";
+    //    for (int i = 0; i < map.Length; i++)
+    //    {
+    //        debugtext += map[i].ToString() + ",";
+    //    }
+    //    Debug.Log(debugtext);
+    //}
+
+    Vector2Int GetPlayerIndex()
     {
-        for (int i = 0; i < map.Length; i++)
+      for(int y=0;y<field.GetLength(0);y++)
         {
-            if (map[i] == 1)
+            for(int x = 0; x < field.GetLength(1); x++)
             {
-                return i;
+                if (field[y, x] == null) { continue; }
+                if (field[y, x].tag== "Player") { return new Vector2Int(x, y); }
             }
         }
-        return -1;
+        return new Vector2Int(-1, -1);
     }
-    int[] map = { 0, 0, 0, 2, 0, 1, 0, 2, 0, 0, 0 };
-    string debugTXT = "";
-    // Start is called before the first frame update
+
+    bool MoveNumber(string tag, Vector2Int moveFrom, Vector2Int moveTo)
+    {
+        //縦軸横軸の配列外参照をしていないか
+        if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
+        if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
+        //Boxタグを持っていたら再帰関数
+        if (field[moveTo.y,moveTo.x]!=null&& field[moveTo.y, moveTo.x].tag=="Box")
+        {
+            Vector2Int velocity = moveTo - moveFrom;
+            bool success = MoveNumber(tag, moveTo, moveTo+velocity);
+            if (!success) { return false; }
+        }
+
+        //GameObjectの座標(position)を移動させてからインデックスの入れ替え
+        field[moveFrom.y, moveFrom.x].transform.position = new Vector3(moveTo.x, field.GetLength(0) - moveTo.y, 0);
+        field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
+        field[moveFrom.y, moveFrom.x] = null;
+
+        //nullチェックをしてからタグのチェックを行う
+        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
+        {
+            Vector2Int velocity = moveTo - moveFrom;
+            bool success = MoveNumber(tag, moveTo, moveTo + velocity);
+            if (!success) { return false; }
+        }
+        //移動
+        //field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
+
+        return true;
+    }
+
+
+
+    //int[] map = { 0, 0, 0, 2, 0, 1, 0, 2, 0, 0, 0 };
+    //string debugTXT = "";
+    //// Start is called before the first frame update
     void Start()
-    {
-        PrintArray();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+    {//変更。分かりやすく３ｘ５サイズ
+        map = new int[,]
         {
-            int PlayerIndex = GetPlayerIndex();
+            {0,0,0,0,0 },
+            {0,0,1,0,0 },
+            {0,0,0,0,0 },
+        };
 
-            PrintArray();
-
-            MoveNumber(1, PlayerIndex, PlayerIndex + 1);
-        }
-
-
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        for (int y = 0; y < map.GetLength(0); y++)
         {
-            int PlayerIndex = GetPlayerIndex();
-
-            PrintArray();
-            MoveNumber(1, PlayerIndex, PlayerIndex - 1);
-
-        }
-
-        bool MoveNumber(int number, int movefarm, int moveTo)
-        {
-            if (moveTo < 0 || moveTo >= map.Length) { return false; }
-            if (map[moveTo] == 2)
+            for (int x = 0; x < map.GetLength(1); x++)
             {
-                int verocity = moveTo - movefarm;
-
-                bool success = MoveNumber(2, moveTo, moveTo + verocity);
-                if (!success) { return false; }
-
+                if (map[y,x] == 1)
+                {
+                    field[y,x]= Instantiate(
+                        playerPrefab,
+                        new Vector3(x, map.GetLength(0) - y, 0),
+                        Quaternion.identity
+                        );
+                }
             }
-            map[moveTo] = number;
-            map[movefarm] = 0;
-            return true;
         }
+    
+
+
+
+        //追加
+        //GameObject instance = Instantiate(
+        //    playerPrefab,
+        //    new Vector3(0, 0, 0),
+        //    Quaternion.identity
+        //   );
+
+
+        string debugText = "";
+        //変更。二重for文で二次元配列の情報を出力
+        for(int y=0;y<map.GetLength(0);y++)
+        {
+            for (int x = 0; x < map.GetLength(1); x++)
+            {
+                debugText += map[y, x].ToString() + ",";
+            }
+            debugText += "\n";//改行
+        }
+        Debug.Log(debugText);
+        
+        //PrintArray();
     }
+
+    //// Update is called once per frame
+    //void Update()
+    //{
+
+    //    if (Input.GetKeyDown(KeyCode.RightArrow))
+    //    {
+    //        //int PlayerIndex = GetPlayerIndex();
+
+    //        //PrintArray();
+
+    //        //MoveNumber(1, PlayerIndex, PlayerIndex + 1);
+    //    }
+
+
+    //    if (Input.GetKeyDown(KeyCode.LeftArrow))
+    //    {
+    //        //int PlayerIndex = GetPlayerIndex();
+
+    //        //PrintArray();
+    //        //MoveNumber(1, PlayerIndex, PlayerIndex - 1);
+
+    //    }
+
+        
+    //}
 }
