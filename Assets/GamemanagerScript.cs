@@ -7,12 +7,11 @@ public class GameManegerScript : MonoBehaviour
 {
     //追加
     public GameObject playerPrefab;
-    
+    public GameObject boxPrefab;
     //宣言の例
     int[,] map;
-
     GameObject[,] field;//ゲーム管理用の配列
-
+    GameObject obj;
 
     //private void PrintArray()
     //{
@@ -37,7 +36,43 @@ public class GameManegerScript : MonoBehaviour
         return new Vector2Int(-1, -1);
     }
 
-    bool MoveNumber(string tag, Vector2Int moveFrom, Vector2Int moveTo)
+     void Update()
+    {
+        if (Input.GetKeyUp(KeyCode.RightArrow))//右移動
+        {
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber(
+                playerIndex,
+                playerIndex + new Vector2Int(1, 0));
+            //PrintArray();
+        }
+        if (Input.GetKeyUp(KeyCode.LeftArrow))//左移動
+        {
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber(
+                playerIndex,
+                playerIndex + new Vector2Int(-1, 0));
+            //PrintArray();
+        }
+        if (Input.GetKeyUp(KeyCode.UpArrow))//上移動
+        {
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber(
+                playerIndex,
+                playerIndex + new Vector2Int(0, -1));
+            //PrintArray();
+        }
+        if (Input.GetKeyUp(KeyCode.DownArrow))//下移動
+        {
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber(
+                playerIndex,
+                playerIndex + new Vector2Int(0, 1));
+            //PrintArray();
+        }
+    }
+
+    bool MoveNumber( Vector2Int moveFrom, Vector2Int moveTo)
     {
         //縦軸横軸の配列外参照をしていないか
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
@@ -46,7 +81,7 @@ public class GameManegerScript : MonoBehaviour
         if (field[moveTo.y,moveTo.x]!=null&& field[moveTo.y, moveTo.x].tag=="Box")
         {
             Vector2Int velocity = moveTo - moveFrom;
-            bool success = MoveNumber(tag, moveTo, moveTo+velocity);
+            bool success = MoveNumber( moveTo, moveTo+velocity);
             if (!success) { return false; }
         }
 
@@ -55,18 +90,17 @@ public class GameManegerScript : MonoBehaviour
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
         field[moveFrom.y, moveFrom.x] = null;
 
-        //nullチェックをしてからタグのチェックを行う
-        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
-        {
-            Vector2Int velocity = moveTo - moveFrom;
-            bool success = MoveNumber(tag, moveTo, moveTo + velocity);
-            if (!success) { return false; }
-        }
+
         //移動
         //field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
 
         return true;
     }
+
+        //
+
+
+
 
 
 
@@ -78,9 +112,15 @@ public class GameManegerScript : MonoBehaviour
         map = new int[,]
         {
             {0,0,0,0,0 },
-            {0,0,1,0,0 },
+            {0,2,1,0,0 },
             {0,0,0,0,0 },
         };
+
+        field = new GameObject[map.GetLength(0), map.GetLength(1)];
+        
+
+
+
 
         for (int y = 0; y < map.GetLength(0); y++)
         {
@@ -90,6 +130,14 @@ public class GameManegerScript : MonoBehaviour
                 {
                     field[y,x]= Instantiate(
                         playerPrefab,
+                        new Vector3(x, map.GetLength(0) - y, 0),
+                        Quaternion.identity
+                        );
+                }
+                if (map[y,x]==2)
+                {
+                    field[y, x] = Instantiate(
+                        boxPrefab,
                         new Vector3(x, map.GetLength(0) - y, 0),
                         Quaternion.identity
                         );
