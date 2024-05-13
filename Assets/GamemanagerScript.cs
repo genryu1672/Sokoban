@@ -8,6 +8,12 @@ public class GameManegerScript : MonoBehaviour
     //’Ç‰Á
     public GameObject playerPrefab;
     public GameObject boxPrefab;
+    public GameObject goalPrefab;
+
+    //’Ç‹L
+    public GameObject clearText;
+
+
     //éŒ¾‚Ì—á
     int[,] map;
     GameObject[,] field;//ƒQ[ƒ€ŠÇ——p‚Ì”z—ñ
@@ -69,8 +75,46 @@ public class GameManegerScript : MonoBehaviour
                 playerIndex,
                 playerIndex + new Vector2Int(0, 1));
             //PrintArray();
+            if(IsCleard())
+            {
+                clearText.SetActive(true);
+            }
         }
     }
+
+    bool IsCleard()
+    {
+        //Vector2IntŒ^‚Ì‰Â•Ï’·”z—ñ‚Ìì¬
+        List<Vector2Int> goals = new List<Vector2Int>();
+
+        for (int y = 0; y < map.GetLength(0); y++)
+        {
+            for (int x = 0; x < map.GetLength(1); x++)
+            {
+                //Ši”[êŠ‚©”Û‚©‚ğ”»’f
+                if (map[y, x] == 3)
+                {
+                    goals.Add(new Vector2Int(x, y));
+                }
+                //—v‘f”‚Ígoals.Count‚Åæ“¾
+                for (int i = 0; i < goals.Count; i++)
+                {
+                    GameObject f = field[goals[i].y, goals[i].x];
+                    if (f == null || f.tag != "Box")
+                    {
+                        //ˆê‚Â‚Å‚à” ‚ª‚È‚©‚Á‚½‚çğŒ–¢’B¬
+                        return false;
+                    }
+                }
+                
+            }
+        }
+        //ğŒ–¢’B¬‚Å‚È‚¯‚ê‚ÎğŒ’B¬
+        return true;
+    }
+
+
+
 
     bool MoveNumber( Vector2Int moveFrom, Vector2Int moveTo)
     {
@@ -111,8 +155,10 @@ public class GameManegerScript : MonoBehaviour
     {//•ÏXB•ª‚©‚è‚â‚·‚­‚R‚˜‚TƒTƒCƒY
         map = new int[,]
         {
-            {0,0,0,0,0 },
-            {0,2,1,0,0 },
+            {0,0,0,0,0 },     //‚R‚ğƒS[ƒ‹˜g
+            {0,3,1,3,0 },
+            {0,0,2,0,0 },
+            {0,2,3,2,0 },
             {0,0,0,0,0 },
         };
 
@@ -166,7 +212,7 @@ public class GameManegerScript : MonoBehaviour
             }
             debugText += "\n";//‰üs
         }
-        Debug.Log(debugText);
+        //Debug.Log(debugText);
         
         //PrintArray();
     }
