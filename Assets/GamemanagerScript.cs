@@ -31,18 +31,18 @@ public class GameManegerScript : MonoBehaviour
 
     Vector2Int GetPlayerIndex()
     {
-      for(int y=0;y<field.GetLength(0);y++)
+        for (int y = 0; y < field.GetLength(0); y++)
         {
-            for(int x = 0; x < field.GetLength(1); x++)
+            for (int x = 0; x < field.GetLength(1); x++)
             {
                 if (field[y, x] == null) { continue; }
-                if (field[y, x].tag== "Player") { return new Vector2Int(x, y); }
+                if (field[y, x].tag == "Player") { return new Vector2Int(x, y); }
             }
         }
         return new Vector2Int(-1, -1);
     }
 
-     void Update()
+    void Update()
     {
         if (Input.GetKeyUp(KeyCode.RightArrow))//右移動
         {
@@ -75,7 +75,7 @@ public class GameManegerScript : MonoBehaviour
                 playerIndex,
                 playerIndex + new Vector2Int(0, 1));
             //PrintArray();
-            if(IsCleard())
+            if (IsCleard())
             {
                 clearText.SetActive(true);
             }
@@ -106,7 +106,7 @@ public class GameManegerScript : MonoBehaviour
                         return false;
                     }
                 }
-                
+
             }
         }
         //条件未達成でなければ条件達成
@@ -116,32 +116,41 @@ public class GameManegerScript : MonoBehaviour
 
 
 
-    bool MoveNumber( Vector2Int moveFrom, Vector2Int moveTo)
+    bool MoveNumber(Vector2Int moveFrom, Vector2Int moveTo)
     {
         //縦軸横軸の配列外参照をしていないか
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
         //Boxタグを持っていたら再帰関数
-        if (field[moveTo.y,moveTo.x]!=null&& field[moveTo.y, moveTo.x].tag=="Box")
+        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
             Vector2Int velocity = moveTo - moveFrom;
-            bool success = MoveNumber( moveTo, moveTo+velocity);
+            bool success = MoveNumber(moveTo, moveTo + velocity);
             if (!success) { return false; }
         }
 
         //GameObjectの座標(position)を移動させてからインデックスの入れ替え
-        field[moveFrom.y, moveFrom.x].transform.position = new Vector3(moveTo.x, field.GetLength(0) - moveTo.y, 0);
+        // field[moveFrom.y, moveFrom.x].transform.position = new Vector3(moveTo.x, field.GetLength(0) - moveTo.y, 0);
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
+
+        Vector3 moveToPosition = new Vector3(
+                  moveTo.x, map.GetLength(0) - moveTo.y, 0
+                  );
+        field[moveFrom.y, moveFrom.x].GetComponent<Move>().MoveTo(moveToPosition);
+
         field[moveFrom.y, moveFrom.x] = null;
 
 
         //移動
         //field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
 
+
+
+
         return true;
     }
 
-        //
+    //
 
 
 
@@ -152,7 +161,9 @@ public class GameManegerScript : MonoBehaviour
     //string debugTXT = "";
     //// Start is called before the first frame update
     void Start()
-    {//変更。分かりやすく３ｘ５サイズ
+    {
+        Screen.SetResolution(1280,720,false);
+        //変更。分かりやすく３ｘ５サイズ
         map = new int[,]
         {
             {0,0,0,0,0 },     //３をゴール枠
@@ -163,7 +174,7 @@ public class GameManegerScript : MonoBehaviour
         };
 
         field = new GameObject[map.GetLength(0), map.GetLength(1)];
-        
+
 
 
 
@@ -172,15 +183,15 @@ public class GameManegerScript : MonoBehaviour
         {
             for (int x = 0; x < map.GetLength(1); x++)
             {
-                if (map[y,x] == 1)
+                if (map[y, x] == 1)
                 {
-                    field[y,x]= Instantiate(
+                    field[y, x] = Instantiate(
                         playerPrefab,
                         new Vector3(x, map.GetLength(0) - y, 0),
                         Quaternion.identity
                         );
                 }
-                if (map[y,x]==2)
+                if (map[y, x] == 2)
                 {
                     field[y, x] = Instantiate(
                         boxPrefab,
@@ -198,7 +209,7 @@ public class GameManegerScript : MonoBehaviour
                 }
             }
         }
-    
+
 
 
 
@@ -212,7 +223,7 @@ public class GameManegerScript : MonoBehaviour
 
         string debugText = "";
         //変更。二重for文で二次元配列の情報を出力
-        for(int y=0;y<map.GetLength(0);y++)
+        for (int y = 0; y < map.GetLength(0); y++)
         {
             for (int x = 0; x < map.GetLength(1); x++)
             {
@@ -221,7 +232,7 @@ public class GameManegerScript : MonoBehaviour
             debugText += "\n";//改行
         }
         //Debug.Log(debugText);
-        
+
         //PrintArray();
     }
 
@@ -248,6 +259,6 @@ public class GameManegerScript : MonoBehaviour
 
     //    }
 
-        
+
     //}
 }
