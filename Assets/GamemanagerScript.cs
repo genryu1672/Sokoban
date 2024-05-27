@@ -51,6 +51,12 @@ public class GameManegerScript : MonoBehaviour
                 playerIndex,
                 playerIndex + new Vector2Int(1, 0));
             //PrintArray();
+            if (IsCleard())
+            {
+                //ゲームオブジェクトのセットアクティブメソットを使い有効
+                clearText.SetActive(true);
+            }
+
         }
         if (Input.GetKeyUp(KeyCode.LeftArrow))//左移動
         {
@@ -59,6 +65,12 @@ public class GameManegerScript : MonoBehaviour
                 playerIndex,
                 playerIndex + new Vector2Int(-1, 0));
             //PrintArray();
+
+            if (IsCleard())
+            {
+                //ゲームオブジェクトのセットアクティブメソットを使い有効
+                clearText.SetActive(true);
+            }
         }
         if (Input.GetKeyUp(KeyCode.UpArrow))//上移動
         {
@@ -67,6 +79,12 @@ public class GameManegerScript : MonoBehaviour
                 playerIndex,
                 playerIndex + new Vector2Int(0, -1));
             //PrintArray();
+            if (IsCleard())
+            {
+                //ゲームオブジェクトのセットアクティブメソットを使い有効
+                clearText.SetActive(true);
+            }
+
         }
         if (Input.GetKeyUp(KeyCode.DownArrow))//下移動
         {
